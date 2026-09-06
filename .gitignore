@@ -1,0 +1,38 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python cache
+pycache/
+*.pyc
+
+# Pytest
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+
+# Database
+*.db
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Local executable / project launcher
+MedGuard_AI
+MedGuard_AI.PY
+
+data/
+
+app/ml/*.joblib
