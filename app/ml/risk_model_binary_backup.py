@@ -1,11 +1,10 @@
-from sklearn.model_selection import GridSearchCV
 import pandas as pd
 from pathlib import Path
 
-from sklearn.model_selection import  train_test_split , GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import(accuracy_score , precision_score ,recall_score ,f1_score,roc_auc_score , confusion_matrix , classification_report)
-import numpy as np
+
 import joblib
 
 
@@ -39,58 +38,15 @@ print("Test shape:" , X_test.shape)
 print("\nCreating Binary Random Forest model ...")
 model = RandomForestClassifier(n_estimators=100, random_state=42 , n_jobs=1 , class_weight="balanced")
 
-param_grid = {"n_estimators":[100 , 200] , "max_depth":[None , 10 , 20] , "min_samples_split":[2 ,5]}
+
+print("\nTraining binary model ...")
+model.fit(X_train , y_train)
+
+print("Training completed !")
 
 
-print("\nStarting Hyperparameter Tuning ...")
-
-grid_search = GridSearchCV(estimator= model , param_grid=param_grid , cv=3 , scoring="f1" , n_jobs=1 , verbose=1)
-
-grid_search.fit(X_train , y_train)
-model = grid_search.best_estimator_
-feature_importance = pd.DataFrame({"feature": X_train.columns, "importance":model.feature_importances_})
-feature_importance = feature_importance.sort_values(by = "importance" , ascending=False)
-
-print("\nFeature Importance:")
-print(feature_importance.head(10))
-
-FEATURE_IMPORTANCE_PATH = BASE_DIR / "app" / "ml" / "feature_importance.csv"
-
-feature_importance.to_csv(FEATURE_IMPORTANCE_PATH , index = False)
-
-print("\nFeature importance saved successfully!")
-print("Location:" , FEATURE_IMPORTANCE_PATH)
-
-print("\nHyperparameter Tuning completed !")
-print("Best Parameters:")
-print(grid_search.best_params_)
-
-print("Best Cross-Validation F1 Score:")
-print(round(grid_search.best_score_,4))
-
-
-
-
-
+y_pred = model.predict(X_test)
 y_prob = model.predict_proba(X_test)[: , 1]
-thresholds =np.arange(0.30 , 0.71 , 0.05)
-best_threshold = 0.50
-best_f1 = 0
-for threshold in thresholds:
-    y_threshold_pred=(y_prob >= threshold).astype(int)
-
-    current_f1 = f1_score(y_test , y_threshold_pred , zero_division=0)
-
-
-    if current_f1 > best_f1 :
-        best_f1 = current_f1
-        best_threshold = threshold
-
-print("\nBest Threshold:" , round(best_threshold , 2))
-print("Best Threshold F1:" , round(best_f1 , 4))
-
-y_pred = (y_prob >= best_threshold).astype(int)
-
 precision = precision_score(y_test , y_pred , zero_division= 0)
 recall = recall_score(y_test , y_pred , zero_division=0)
 f1 = f1_score(y_test , y_pred , zero_division=0)

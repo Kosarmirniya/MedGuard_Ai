@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MedGuard AI Dashboard</title>
+
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 24px 40px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #6b7280;
+        }
+
+        main {
+            padding: 30px 40px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        section h2 {
+            margin-bottom: 18px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .card h3 {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* Risk Assessment */
+
+        #risk-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 7px;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+        }
+
+        .form-button {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        #risk-result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Feature Importance */
+
+        #feature-importance {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
+
+        #feature-list {
+            margin-top: 5px;
+        }
+
+        .feature-row {
+            margin-bottom: 22px;
+        }
+
+        .feature-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .feature-rank {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .feature-name {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .feature-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .progress-container {
+            width: calc(100% - 44px);
+            height: 11px;
+            margin-left: 44px;
+            background: #eef2f7;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
+            border-radius: 10px;
+            transition: width 0.7s ease;
+        }
+
+
+        #patient-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+#patient-details h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #111827;
+}
+
+.patient-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.patient-detail-item {
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+.patient-detail-label {
+    display: block;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.patient-detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+@media (max-width: 700px) {
+
+    .patient-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+
+        /* ==========================================
+   Patients Section
+   ========================================== */
+
+#patients-section {
+    margin-top: 30px;
+}
+
+.patients-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.patients-header h3 {
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.patients-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+#refresh-patients {
+    background: #2563eb;
+    padding: 10px 16px;
+}
+
+/* Patient list */
+
+#patients-list {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.patients-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.patients-table th {
+    text-align: left;
+    padding: 13px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 13px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.patients-table td {
+    padding: 14px 13px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+.patients-table tr:hover {
+    background: #f9fafb;
+}
+
+.patient-id {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.no-patients {
+    padding: 30px;
+    text-align: center;
+    color: #6b7280;
+}
+
+        @media (max-width: 700px) {
+
+            main {
+                padding: 20px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .cards {
+                flex-direction: column;
+            }
+
+            #risk-form {
+                grid-template-columns: 1fr;
+            }
+
+            .form-button {
+                grid-column: auto;
+            }
+
+        }
+
+        .assessment-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.assessment-history-item {
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 1fr 1fr;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.assessment-history-item strong {
+    font-weight: 600;
+}
+
+.assessment-history-item div {
+    font-size: 15px;
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>MedGuard AI</h1>
+
+        <p>
+            Healthcare Risk Assessment Platform
+        </p>
+
+    </header>
+
+    <main>
+
+        <!-- Dashboard Overview -->
+
+        <section>
+
+            <h2>Dashboard Overview</h2>
+
+            <div class="cards">
+
+                <div class="card">
+
+                    <h3>Total Patients</h3>
+
+                    <p id="total-patients">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Risk Assessments</h3>
+
+                    <p id="total-assessments">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Model Status</h3>
+
+                    <p id="model-status">Active</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Risk Assessment -->
+
+        <section>
+
+            <h2>Risk Assessment</h2>
+
+            <div class="card">
+
+                <form id="risk-form">
+
+                    <div class="form-group">
+
+                        <label>High Blood Pressure</label>
+
+                        <select id="HighBP" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>High Cholesterol</label>
+
+                        <select id="HighChol" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Cholesterol Check</label>
+
+                        <select id="CholCheck" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>BMI</label>
+
+                        <input
+                            type="number"
+                            id="BMI"
+                            min="1"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Smoker</label>
+
+                        <select id="Smoker" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Stroke</label>
+
+                        <select id="Stroke" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Heart Disease or Attack</label>
+
+                        <select
+                            id="HeartDiseaseorAttack"
+                            required
+                        >
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Physical Activity</label>
+
+                        <select id="PhysActivity" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Fruits</label>
+
+                        <select id="Fruits" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Vegetables</label>
+
+                        <select id="Veggies" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Heavy Alcohol Consumption</label>
+
+                        <select id="HvyAlcoholConsump" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Any Healthcare</label>
+
+                        <select id="AnyHealthcare" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>No Doctor Due to Cost</label>
+
+                        <select id="NoDocbcCost" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>General Health (1-5)</label>
+
+                        <input
+                            type="number"
+                            id="GenHlth"
+                            min="1"
+                            max="5"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Mental Health Days</label>
+
+                        <input
+                            type="number"
+                            id="MentHlth"
+                            min="0"
+                            max="30"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Physical Health Days</label>
+
+                        <input
+                            type="number"
+                            id="PhysHlth"
+                            min="0"
+                            max="30"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Difficulty Walking</label>
+
+                        <select id="DiffWalk" required>
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Sex</label>
+
+                        <select id="Sex" required>
+
+                            <option value="0">Female</option>
+                            <option value="1">Male</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Age Category (1-13)</label>
+
+                        <input
+                            type="number"
+                            id="Age"
+                            min="1"
+                            max="13"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Education (1-6)</label>
+
+                        <input
+                            type="number"
+                            id="Education"
+                            min="1"
+                            max="6"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Income (1-8)</label>
+
+                        <input
+                            type="number"
+                            id="Income"
+                            min="1"
+                            max="8"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-button">
+
+                        <button type="submit">
+                            Assess Risk
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+                <div id="risk-result">
+
+                    Enter patient information and click
+                    "Assess Risk".
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+    <h2>Risk Assessment History</h2>
+
+    <div class="card">
+        <div id="assessment-history">
+            Loading assessments...
+        </div>
+    </div>
+</section>
+
+        <!-- Feature Importance -->
+
+        <section>
+
+            <h2>Feature Importance</h2>
+
+            <div id="feature-importance">
+
+                <div id="feature-list">
+
+                    Loading model insights...
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Patients -->
+
+<section id="patients-section">
+
+    <h2>Patients</h2>
+
+    <div class="card">
+
+        <div class="patients-header">
+
+            <div>
+                <h3>Patient Records</h3>
+                <p>Manage registered patients</p>
+            </div>
+
+            <button
+                type="button"
+                id="refresh-patients">
+                Refresh
+            </button>
+
+        </div>
+
+        <div id="patients-list">
+
+            Loading patients...
+
+        </div>
+
+        <div id="patient-details"></div>
+
+    </div>
+
+</section>
+
+
+        <!-- Quick Actions -->
+
+        <section>
+
+            <h2>Quick Actions</h2>
+
+            <div class="quick-actions">
+
+                <button type="button">
+                    New Risk Assessment
+                </button>
+
+                <button type="button">
+                    View Patients
+                </button>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- JavaScript -->
+
+    <script>
+
+
+
+
+
+
+
+        // ==========================================
+        // Feature Importance
+        // ==========================================
+
+        async function loadFeatureImportance() {
+
+    const featureList =
+        document.getElementById("feature-list");
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/feature-importance"
+        );
+
+        if (!response.ok) {
+            throw new Error("Feature Importance API failed");
+        }
+
+        const data = await response.json();
+
+        console.log("Feature API response:", data);
+
+        featureList.innerHTML = "";
+
+        data.feature
+            .slice(0, 10)
+            .forEach((item, index) => {
+
+                const percentage =
+                    (item.importance * 100).toFixed(1);
+
+                const row =
+                    document.createElement("div");
+
+                row.className = "feature-row";
+
+                row.innerHTML =
+
+                    '<div class="feature-info">' +
+
+                        '<div class="feature-rank">' +
+                              (index + 1) +
+                        '</div>' +
+
+                        '<span class="feature-name">' +
+                            item.feature +
+                        '</span>' +
+
+                        '<span class="feature-value">' +
+                            percentage +
+                            '%' +
+                        '</span>' +
+
+                    '</div>' +
+
+                    '<div class="progress-container">' +
+
+                        '<div class="progress-bar" ' +
+                        'style="width: ' +
+                        percentage +
+                        '%;"></div>' +
+
+                    '</div>';
+
+                featureList.appendChild(row);
+
+            });
+
+    } catch (error) {
+
+        console.error(
+            "Feature Importance Error:",
+            error
+        );
+
+        featureList.innerHTML =
+            "Unable to load model insights.";
+
+    }
+
+}
+
+         
+        async function loadPatients() {
+
+    const patientsList =
+        document.getElementById("patients-list");
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/patients"
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load patients");
+        }
+
+        const data = await response.json();
+
+        console.log(
+            "Patients API response:",
+            data
+        );
+
+        const patients = data.patients;
+
+        if (!patients || patients.length === 0) {
+
+            patientsList.innerHTML =
+                '<div class="no-patients">' +
+                'No patients found.' +
+                '</div>';
+
+            return;
+        }
+
+        let table =
+            '<table class="patients-table">' +
+
+                '<thead>' +
+
+                    '<tr>' +
+
+                        '<th>ID</th>' +
+
+                        '<th>Age</th>' +
+
+                        '<th>Blood Pressure</th>' +
+
+                        '<th>Blood Sugar</th>' +
+
+                        '<th>Heart Rate</th>' +
+
+                        '<th>Action</th>'+
+
+                    '</tr>' +
+
+                '</thead>' +
+
+                '<tbody>';
+
+
+        patients.forEach(function(patient) {
+
+            table +=
+                '<tr>' +
+
+                    '<td class="patient-id">' +
+                        (patient.id ?? "-") +
+                    '</td>' +
+
+                    '<td>' +
+                        (patient.age ?? "-") +
+                    '</td>' +
+
+                    '<td>' +
+                        (patient.systolic_bp ?? "-") +
+                        ' / ' +
+                        (patient.diastolic_bp ?? "-") +
+                    '</td>' +
+
+                    '<td>' +
+                        (patient.blood_sugar ?? "-") +
+                    '</td>' +
+
+                    '<td>' +
+                        (patient.heart_rate ?? "-") +
+                    '</td>' +
+
+                    '<td>' +
+                        '<button type="button" ' +
+                        'onclick="viewPatient(' + patient.id + ')">' +
+                            'View' +
+                        '</button>' +
+                    '</td>' +
+
+                '</tr>';
+
+        });
+
+
+        table +=
+                '</tbody>' +
+            '</table>';
+
+
+        patientsList.innerHTML = table;
+
+
+    } catch (error) {
+
+        console.error(
+            "Patients Error:",
+            error
+        );
+
+        patientsList.innerHTML =
+            '<div class="no-patients">' +
+            'Unable to load patients.' +
+            '</div>';
+    }
+
+}
+
+
+async function viewPatient(patientId) {
+
+    const detailsBox = document.getElementById("patient-details");
+
+
+    detailsBox.innerHTML ="Loading patient details...";
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/patients/" + patientId
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load patient details");
+        }
+
+        const data = await response.json();
+
+        const patient = data.patient;
+
+        detailsBox.innerHTML =
+
+            '<h3>Patient #' +
+            patient.id +
+            '</h3>' +
+
+            '<div class="patient-detail-grid">' +
+
+                '<div class="patient-detail-item">' +
+                    '<span class="patient-detail-label">' +
+                        'Age' +
+                    '</span>' +
+                    '<span class="patient-detail-value">' +
+                        (patient.age ?? "-") +
+                    '</span>' +
+                '</div>' +
+
+                '<div class="patient-detail-item">' +
+                    '<span class="patient-detail-label">' +
+                        'Blood Pressure' +
+                    '</span>' +
+                    '<span class="patient-detail-value">' +
+                        (patient.systolic_bp ?? "-") +
+                        ' / ' +
+                        (patient.diastolic_bp ?? "-") +
+                    '</span>' +
+                '</div>' +
+
+                '<div class="patient-detail-item">' +
+                    '<span class="patient-detail-label">' +
+                        'Blood Sugar' +
+                    '</span>' +
+                    '<span class="patient-detail-value">' +
+                        (patient.blood_sugar ?? "-") +
+                    '</span>' +
+                '</div>' +
+
+                '<div class="patient-detail-item">' +
+                    '<span class="patient-detail-label">' +
+                        'Heart Rate' +
+                    '</span>' +
+                    '<span class="patient-detail-value">' +
+                        (patient.heart_rate ?? "-") +
+                    '</span>' +
+                '</div>' +
+
+            '</div>';
+
+    } catch (error) {
+
+        console.error(
+            "Patient Details Error:",
+            error
+        );
+
+        detailsBox.innerHTML =
+            '<div class="no-patients">' +
+            'Unable to load patient details.' +
+            '</div>';
+    }
+}
+
+async function loadAssessmentHistory() {
+
+    const historyBox = document.getElementById("assessment-history");
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/risk-assessments"
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load assessment history");
+        }
+
+        const data = await response.json();
+
+        const assessments = data.assessments || [];
+
+        if (assessments.length === 0) {
+
+            historyBox.innerHTML =
+                '<div class="no-patients">' +
+                'No risk assessments yet.' +
+                '</div>';
+
+            return;
+        }
+
+        historyBox.innerHTML =
+            '<div class="assessment-history-list">' +
+            assessments.map(function (assessment) {
+
+                return (
+                    '<div class="assessment-history-item">' +
+
+                        '<div>' +
+                            '<strong>Assessment #' +
+                            assessment.id +
+                            '</strong>' +
+                        '</div>' +
+
+                        '<div>' +
+                            '<span>Risk Level: </span>' +
+                            '<strong>' +
+                            assessment.risk_level +
+                            '</strong>' +
+                        '</div>' +
+
+                        '<div>' +
+                            '<span>Prediction: </span>' +
+                            assessment.prediction +
+                        '</div>' +
+
+                        '<div>' +
+                            '<span>Confidence: </span>' +
+                            assessment.confidence +
+                            '%' +
+                        '</div>' +
+
+                    '</div>'
+                );
+
+            }).join("") +
+            '</div>';
+
+    } catch (error) {
+
+        console.error(
+            "Assessment History Error:",
+            error
+        );
+
+        historyBox.innerHTML =
+            '<div class="no-patients">' +
+            'Unable to load assessment history.' +
+            '</div>';
+    }
+}
+
+async function loadDashboardStats() {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/patients");
+
+        if(!response.ok){
+            throw new Error("Failed to load dashboard stats")}
+
+
+
+
+            const data = await response.json();
+
+            const patients = data.patients || [];
+
+
+            const assessmentResponse = await fetch(
+    "http://127.0.0.1:8000/risk-assessments/count"
+);
+
+if (!assessmentResponse.ok) {
+    throw new Error("Failed to load risk assessments");
+}
+
+const assessmentData = await assessmentResponse.json();
+
+document.getElementById("total-assessments").textContent =
+    assessmentData.total_assessments;
+        
+document.getElementById("total-patients").textContent = patients.length
+        }    
+    catch (error){console.error("Dashboard Stats Error:" , error);}}
+
+       
+
+        
+        
+            
+
+   
+
+
+      
+    
+
+ 
+
+              
+        
+        // ==========================================
+        // Risk Assessment
+        // ==========================================
+
+        document
+    .getElementById("risk-form")
+    .addEventListener("submit", async function(event) {
+
+
+         
+
+        event.preventDefault();
+
+        const resultBox =
+            document.getElementById("risk-result");
+
+        resultBox.innerHTML = "Assessing risk...";
+
+        const data = {
+
+            HighBP: Number(
+                document.getElementById("HighBP").value
+            ),
+
+            HighChol: Number(
+                document.getElementById("HighChol").value
+            ),
+
+            CholCheck: Number(
+                document.getElementById("CholCheck").value
+            ),
+
+            BMI: Number(
+                document.getElementById("BMI").value
+            ),
+
+            Smoker: Number(
+                document.getElementById("Smoker").value
+            ),
+
+            Stroke: Number(
+                document.getElementById("Stroke").value
+            ),
+
+            HeartDiseaseorAttack: Number(
+                document.getElementById("HeartDiseaseorAttack").value
+            ),
+
+            PhysActivity: Number(
+                document.getElementById("PhysActivity").value
+            ),
+
+            Fruits: Number(
+                document.getElementById("Fruits").value
+            ),
+
+            Veggies: Number(
+                document.getElementById("Veggies").value
+            ),
+
+            HvyAlcoholConsump: Number(
+                document.getElementById("HvyAlcoholConsump").value
+            ),
+
+            AnyHealthcare: Number(
+                document.getElementById("AnyHealthcare").value
+            ),
+
+            NoDocbcCost: Number(
+                document.getElementById("NoDocbcCost").value
+            ),
+
+            GenHlth: Number(
+                document.getElementById("GenHlth").value
+            ),
+
+            MentHlth: Number(
+                document.getElementById("MentHlth").value
+            ),
+
+            PhysHlth: Number(
+                document.getElementById("PhysHlth").value
+            ),
+
+            DiffWalk: Number(
+                document.getElementById("DiffWalk").value
+            ),
+
+            Sex: Number(
+                document.getElementById("Sex").value
+            ),
+
+            Age: Number(
+                document.getElementById("Age").value
+            ),
+
+            Education: Number(
+                document.getElementById("Education").value
+            ),
+
+            Income: Number(
+                document.getElementById("Income").value
+            )
+
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/risk-assessment",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
+
+            const responseData =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                resultBox.innerHTML =
+                    "Error: " +
+                    (
+                        responseData.detail ||
+                        "Risk assessment failed."
+                    );
+
+                return;
+            }
+
+
+            const result =
+                responseData.result;
+
+
+            resultBox.innerHTML =
+                "<h3>Risk Assessment Result</h3>" +
+
+                "<p><strong>Risk Level:</strong> " +
+                result.risk_level +
+                "</p>" +
+
+                "<p><strong>Confidence:</strong> " +
+                result.confidence +
+                "%</p>" +
+
+                "<p><strong>Prediction:</strong> " +
+                result.prediction +
+                "</p>";
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            resultBox.innerHTML =
+                "Unable to connect to MedGuard AI API.";
+
+        }
+
+    });
+
+
+// ==========================================
+// Load Feature Importance
+// ==========================================
+
+loadFeatureImportance();
+loadPatients();
+loadDashboardStats();
+loadAssessmentHistory();
+
+
+</script>
+
+</body>
+</html>
