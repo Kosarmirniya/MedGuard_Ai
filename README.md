@@ -1,47 +1,78 @@
-# MedGuard AI
+# MedGuard AI 🏥🤖
 
-AI-powered healthcare risk assessment platform built with Python, FastAPI, and Machine Learning.
+An intelligent healthcare risk assessment prototype built with Python, FastAPI, SQLAlchemy, and Machine Learning.
 
-## Overview
+MedGuard AI combines a REST API, patient management, machine learning-based risk estimation, feature importance analysis, and risk assessment history in a simple dashboard.
 
-MedGuard AI is a machine-learning-based healthcare risk assessment platform.
+> ⚠️ This project is an educational and portfolio prototype. It is not clinically validated and should not be used for medical diagnosis or treatment.
 
-The project provides a REST API for patient management and health risk assessment.
+---
 
-## Technologies
+## 🚀 Features
+
+- Machine Learning-based risk estimation
+- Random Forest classification model
+- Risk probabilities and confidence score
+- Feature importance analysis
+- Patient management
+- Patient details
+- Risk assessment history
+- Dashboard statistics
+- FastAPI REST API
+- SQLAlchemy database integration
+- Interactive Swagger API documentation
+
+---
+
+## 🛠️ Technologies
 
 - Python
 - FastAPI
+- SQLAlchemy
 - Scikit-learn
 - Pandas
-- SQLAlchemy
-- Pytest
-- Git & GitHub
+- NumPy
+- Joblib
+- HTML
+- CSS
+- JavaScript
+- SQLite
 
-## Features
+---
 
-- Patient management
-- Machine learning risk prediction
-- Risk level assessment
-- Prediction probabilities
-- RESTful API
-- Automated tests
+## 🧠 Machine Learning
 
-## API
+The machine learning component uses health-related indicators to estimate diabetes-related risk categories.
 
-Main endpoints:
+The model was trained using the CDC Diabetes Health Indicators dataset.
 
-- GET /
-- GET /health
-- POST /risk-assessment
-- POST /patients
-- GET /patients
-- GET /patients/{patient_id}
+### Model
 
-## Disclaimer
+- Algorithm: Random Forest Classifier
+- Input features: 21 health indicators
+- Output: Risk category
+- Probability estimates: Included
+- Feature importance: Included
 
-MedGuard AI is a software engineering and machine learning project for educational and research purposes. It is not a medical diagnostic system.
+---
 
-## Status
+## 📂 Project Structure
 
-🚧 Active Development
+`text
+MedGuard_Ai/
+│
+├── app/
+│   ├── api/
+│   ├── core/
+│   ├── db/
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   ├── ml/
+│   └── main.py
+│
+├── data/
+├── notebooks/
+├── tests/
+├── README.md
+└── requirements.txt
