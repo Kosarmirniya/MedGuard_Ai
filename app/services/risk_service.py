@@ -5,7 +5,7 @@ from pathlib import Path
 # masir model zakhire
 
 BASE_DIR = Path (__file__).resolve().parents[1]
-MODEL_PATH = BASE_DIR /"ml"/"Risk_model_binary.joblib"
+MODEL_PATH = BASE_DIR /"ml"/"risk_model.joblib"
 
 #bargozari model
 

@@ -1,0 +1,72 @@
+{
+  "trained_at_utc": "2026-09-20T01:35:29.322932+00:00",
+  "sklearn_version": "1.9.0",
+  "model_type": "BalancedRandomForestClassifier",
+  "n_estimators": 200,
+  "feature_names": [
+    "HighBP",
+    "HighChol",
+    "CholCheck",
+    "BMI",
+    "Smoker",
+    "Stroke",
+    "HeartDiseaseorAttack",
+    "PhysActivity",
+    "Fruits",
+    "Veggies",
+    "HvyAlcoholConsump",
+    "AnyHealthcare",
+    "NoDocbcCost",
+    "GenHlth",
+    "MentHlth",
+    "PhysHlth",
+    "DiffWalk",
+    "Sex",
+    "Age",
+    "Education",
+    "Income"
+  ],
+  "classes": [
+    0,
+    1
+  ],
+  "metrics": {
+    "accuracy": 0.7670490381583097,
+    "macro_avg": {
+      "precision": 0.6356198061413694,
+      "recall": 0.7290338883777499,
+      "f1-score": 0.6498249272040959,
+      "support": 50736.0
+    },
+    "weighted_avg": {
+      "precision": 0.8531508767526204,
+      "recall": 0.7670490381583097,
+      "f1-score": 0.7959727048468251,
+      "support": 50736.0
+    },
+    "per_class": {
+      "0": {
+        "precision": 0.9371842741049857,
+        "recall": 0.7817344905764078,
+        "f1-score": 0.8524303604649711,
+        "support": 43667.0
+      },
+      "1": {
+        "precision": 0.33405533817775296,
+        "recall": 0.6763332861790918,
+        "f1-score": 0.44721949394322064,
+        "support": 7069.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        34136,
+        9531
+      ],
+      [
+        2288,
+        4781
+      ]
+    ]
+  }
+}
