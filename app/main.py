@@ -1,20 +1,34 @@
-
-from fastapi import  FastAPI , Depends
+import logging
+from fastapi import  FastAPI , Depends ,Request , HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware . cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from pathlib import Path
+from sqlalchemy import text
 import pandas as pd
-from app.schemas.risk import RiskRequest,PatientCreate
+from app.schemas.risk import (RiskRequest,PatientCreate , PatientResponse , RiskResponse , RiskAssessmentResponse,
+                              RiskAssessmentCountResponse,PatientUpdateResponse, PatientDeleteResponse)
 from app.db.database import engine , Base ,SessionLocal , get_db
 from app.models.patient import Patient
 from app.models.risk_assessment import RiskAsessment
 from app.services.risk_service import predict_risk
+from app.core.config import FEATURE_IMPORTANCE_PATH
+from app.core.config import  DEBUG , ALLOWED_ORIGINS
 
 
 
-app = FastAPI( title="MedGuard AI" , description = "Intelligent Healthcare Risk Assessment Platform" , version="0.1.0" ,)
 
-app.add_middleware( CORSMiddleware ,allow_origins=["*"] , allow_credentials=True , allow_methods=["*"], allow_headers=["*"] , )
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+
+
+app = FastAPI( title="MedGuard AI" , description = "Intelligent Healthcare Risk Assessment Platform" , version="0.1.0" , debug=DEBUG)
+@app.exception_handler(Exception)
+async def global_exception_handler(request:Request, exc:Exception):
+    logger.exception("Unhandled exception occurred")
+    return JSONResponse(status_code=500, content= {"success": False,"error":"Internal Server Error" , "detail":"An unexpected error occurred."})
+
+app.add_middleware( CORSMiddleware ,allow_origins=ALLOWED_ORIGINS , allow_credentials=True , allow_methods=["*"], allow_headers=["*"] , )
 
 Base.metadata.create_all(bind = engine)
 
@@ -24,25 +38,28 @@ def home():
         "message" : "MedGuard AI is running !" , "status" : "success" ,}
 
 
-@app.get("/health")
+@app.get("/health",
+    tags=["Health"] , summary="Check API and database health")
+
 def health_check() :
-    return{
-        "status" : "healthy"
-    }
+    db = SessionLocal()
 
-@app.get("/feature_importance")
-def get_feature_importance():
-    BASE_DIR = Path(__file__).resolve().parent
-    FEATURE_IMPORTANCE_PATH = (BASE_DIR / "ml" / "feature_importance.csv")
+    try:
+        db.execute(text("SELECT 1"))
+        return {
+            "status" : "healthy",
+            "database" : "connected"
+        }
 
-    if not FEATURE_IMPORTANCE_PATH.exists():
-        return {"message":"Feature importance file not found" , "status": "error"}
+    except Exception:
+        return JSONResponse(status_code=503 ,
+        content={"status": "unhealthy" , "database":"disconnected"})
 
-    df = pd.read_csv(FEATURE_IMPORTANCE_PATH)
+    finally:
+        db.close()
 
-    return {"status": "success" , "features": df.to_dict(orient="records")}
 
-@app.post("/risk-assessment")
+@app.post("/risk-assessment" , response_model=RiskResponse , tags= ["Risk Assesment"] , summary="Perform a healthcare risk assessment")
 def risk_assessment(data:RiskRequest , db:Session = Depends(get_db)):
     result = predict_risk(data)
     assessment =RiskAsessment(prediction= result["prediction"] ,
@@ -50,12 +67,17 @@ def risk_assessment(data:RiskRequest , db:Session = Depends(get_db)):
                                confidence = result["confidence"])
 
     db.add(assessment)
-    db.commit()
-    db.refresh(assessment)
 
+    try:
+        db.commit()
+        db.refresh(assessment)
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500 , detail="Failed to save risk assessment")
     return {"message": "Risk assessment completed successfully" , "result":result }
 
-@app.get("/risk-assessments/count")
+@app.get("/risk-assessments/count" , response_model= RiskAssessmentCountResponse ,tags=["Risk Assessment"] ,
+          summary="Get total number of risk assessments" )
 def get_risk_assessments_count(db:Session = Depends(get_db)):
 
     count = db.query(RiskAsessment).count()
@@ -65,75 +87,75 @@ def get_risk_assessments_count(db:Session = Depends(get_db)):
 
 
 
-@app.get("/risk-assessments")
+@app.get("/risk-assessments" , response_model=list[RiskAssessmentResponse] , tags=["Risk Assessment"] , summary="Get all risk assessments")
 def get_risk_assessments(db:Session = Depends(get_db)):
     assessments = db.query(RiskAsessment).all()
-
-    return {
-        "assessments":[{"id":assessment.id,"prediction" :assessment.prediction,"risk_level":assessment.risk_level ,
-                         "confidence": assessment.confidence}
-
-        for assessment in assessments
-        ]
-    }
+    return assessments
                     
-
-
                 
-@app.post("/patients")
+@app.post("/patients" , status_code=201 , response_model=PatientResponse , tags=["Patients"] , summary="Create  a new patient")
+
 def create_patient(patient : PatientCreate, db : Session = Depends(get_db)):
     new_patient = Patient(**patient.model_dump())
     db.add(new_patient)
-    db.commit()
-    db.refresh(new_patient)
 
-    return {"message" : "Patient created successfuly" , "patient_id" : new_patient.id}
-@app.get("/patients")
+    try:
+        db.commit()
+        db.refresh(new_patient)
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500 , detail="Failed to create patient")
+    return new_patient
+@app.get("/patients" , response_model=list[PatientResponse] , tags=["Patients"] , summary="Get all patients")
 def get_patients(db : Session = Depends(get_db)):
-    Patients = db.query(Patient).all()
-    return { "patients": Patients}
-@app.get("/patients/{patient_id}")
+    patients = db.query(Patient).all()
+    return patients
+@app.get("/patients/{patient_id}" , response_model=PatientResponse , tags=["Patients"] , summary="Get a patient by ID")
 def get_patient(patient_id : int , db : Session = Depends(get_db)):
 
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient :
-        return{"message" : "Patient not found"}
-    return{"patient": patient}
+        raise HTTPException(status_code=404 , detail="Patient not found")
+    return patient
 
-@app.put("/patient/{patient_id}")
+@app.put("/patients/{patient_id}" , response_model=PatientUpdateResponse , tags=["Patients"] , summary="Update a patient")
 def update_patient(patient_id : int , patient_data : PatientCreate, db : Session= Depends(get_db)):
-
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient :
-        return{"message" : "Patient not found"}
-    patient.age = patient_data.age
+        raise HTTPException(status_code=404 , detail="Patient not found")
+
+    patient.age =patient_data.age
     patient.systolic_bp=patient_data.systolic_bp
     patient.diastolic_bp=patient_data.diastolic_bp
-    patient.blood_sugar = patient_data.blood_sugar 
-    patient.heart_rate = patient_data.heart_rate
-
-    db.commit()
-    db.refresh(patient)
-
+    patient.blood_sugar =patient_data.blood_sugar
+    patient.heart_rate =patient_data.heart_rate
+    try:
+        db.commit()
+        db.refresh(patient)
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500 , detail="Failed to update patient")
     return{"message": "Patient updated successfully" , "patient_id" : patient.id}
 
 
-@app.delete("/patients/{patient_id}")
-def deleted_patient(patient_id : int, db : Session = Depends(get_db)):
+@app.delete("/patients/{patient_id}" , response_model=PatientDeleteResponse , tags=["Patients"] , summary= "Delete a patient")
+def delete_patient(patient_id : int, db : Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
-        return{"message": "Patient not found"}
-    db.delete(patient)
-    db.commit()
+        raise HTTPException(status_code= 404 , detail="Patient not found")
+        db.delete(patient)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500 , detail="Failed to delete patient")
+    return{"message" : "Patient deleted successfully" , "patient_id" :patient_id}
 
-    return{"message" : "Patient deleted successfuly" , "patient_id" :patient_id}
-
-@app.get("/feature-importance")
+@app.get("/feature-importance" , tags=["Machine Learning"] , summary="Get model feature importance")
 def get_feature_importance():
-    base_dir = Path(__file__).resolve().parents[1]
-    feature_path =(base_dir / "app" / "ml" / "feature_importance.csv")
+    feature_path = FEATURE_IMPORTANCE_PATH
 
     if not feature_path.exists():
-        return{"message" : "Feature importance file not found"}
+        raise HTTPException(status_code=404 , detail="Feature importance file not found")
     df = pd.read_csv(feature_path)
     return{"feature": df.to_dict(orient="records")}

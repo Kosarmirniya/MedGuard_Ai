@@ -1,15 +1,12 @@
 import joblib
 import pandas as pd
-from pathlib import Path
-
-# masir model zakhire
-
-BASE_DIR = Path (__file__).resolve().parents[1]
-MODEL_PATH = BASE_DIR /"ml"/"risk_model.joblib"
+from app.core.config import MODEL_PATH
+from functools import lru_cache
 
 #bargozari model
-
-model = joblib.load(MODEL_PATH)
+@lru_cache(maxsize= 1)
+def load_model():
+    return joblib.load(MODEL_PATH)
 
 #Tartib daqiq vizhgi ha motabeq dataset
 
@@ -39,6 +36,7 @@ FEATURES = [
 
 
 def predict_risk(data):
+    model =load_model()
     """
     دریافت اطلاعات ورودی و پیش‌بینی سطح ریسک
     """
